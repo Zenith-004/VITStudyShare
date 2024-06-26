@@ -1,0 +1,55 @@
+<%- include ('includes/header')%>
+
+<div class="container py-md-0">
+
+  <%- include('includes/flash')%>
+
+  <div class="row">
+    <div class="col-lg-7 py-3 py-md-5">
+      <br><br>
+      <h1 class="display-3">Welcome to VITStudyShare</h1>      
+      <p class="display-2"> your hub for sharing and discovering study materials! Join a vibrant community where VIT students connect, collaborate, and excel together. Explore, upload, and enhance your learning journey with us!"
+      </p>
+    </div>
+    <div class="col-lg-5 pl-lg-5 pb-3 py-lg-5">
+         <div class="wrapper">
+          <div class="form-box">
+            <h2>Register</h2>
+      <form action="/register" method="POST" id="registration-form">
+
+        <% regErrors.forEach(function(message) { %>
+          <div class="alert alert-danger small"><%= message%></div>
+        <% }) %>
+
+        <div class="input-box">
+          <span class="icon"><ion-icon name="person"></ion-icon></ion-icon></span>
+          <input type="text" name="username"  autocomplete="off" required>
+          <label>Username</label>
+      </div>
+          
+      <div class="input-box">
+        <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></ion-icon></span>
+        <input type="text" name="email" autocomplete="off" required>
+        <label>Email</label>
+    </div>
+          
+      <div class="input-box">
+        <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></ion-icon></span>
+        <input type="password" name="password" autocomplete="off" required>
+        <label>Password</label>
+    </div>
+          
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          
+          <button type="submit" id="btn">Sign Up </button>
+          
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<%- include('includes/footer') %>
