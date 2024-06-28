@@ -89,7 +89,7 @@ exports.register = function(req, res) {
 }
 
 exports.home = async function(req, res) {
-  if(req.session.user && User.isAdmin){
+  if(req.session.user && User.isAdmin(req.session.user.username)){
       res.render('admin')
   }else{
     if (req.session.user) {

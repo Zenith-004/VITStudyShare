@@ -131,21 +131,12 @@ User.doesEmailExist = function(email) {
   })
 }
 
-User.isAdmin = function(){
-  return new Promise((resolve, reject) => {
-    this.cleanUp()
-    usersCollection.findOne({username: this.data.username}).then((attemptedUser) => {
-      if (attemptedUser && bcrypt.compareSync(this.data.password, attemptedUser.password) && attemptedUser == "admin") {
-        this.data = attemptedUser
-        this.getAvatar()
-        resolve(true)
-      } else {
-        reject("Invalid username / password.")
-      }
-    }).catch(function() {
-      reject("Please try again later.")
-    })
-  })
+User.isAdmin= function(username){
+if(username=="admin"){
+  return true
 }
+}
+
+
 
 module.exports = User
