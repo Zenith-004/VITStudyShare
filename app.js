@@ -10,8 +10,6 @@ const sanitizeHTML = require('sanitize-html')
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
-app.use('/api', require('./router-api'))
-
 let sessionOptions = session({
   secret: "JavaScript is sooooooooo coool",
   store: MongoStore.create({client: require('./db')}),

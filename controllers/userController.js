@@ -89,12 +89,16 @@ exports.register = function(req, res) {
 }
 
 exports.home = async function(req, res) {
-  if (req.session.user) {
-    // fetch feed of posts for current user
-    let posts = await Post.getFeed(req.session.user._id)
-    res.render('home-dashboard', {posts: posts})
-  } else {
-    res.render('home-guest', {regErrors: req.flash('regErrors')})
+  if(req.session.user && User.isAdmin){
+      res.render('admin')
+  }else{
+    if (req.session.user) {
+      // fetch feed of posts for current user
+      let posts = await Post.getFeed(req.session.user._id)
+      res.render('home-dashboard', {posts: posts})
+    } else {
+      res.render('home-guest', {regErrors: req.flash('regErrors')})
+    }
   }
 }
 
