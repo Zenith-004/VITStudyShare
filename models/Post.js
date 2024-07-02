@@ -102,14 +102,22 @@ Post.reusablePostQuery = async function(uniqueOperations, visitorId, finalOperat
 
   let posts = await postsCollection.aggregate(aggOperations).toArray()
 
-  // clean up author property in each post object
+  // Clean up author property in each post object
   posts = posts.map(post => {
     post.isVisitorOwner = post.authorId.equals(visitorId)
     post.authorId = undefined
 
-    post.author = {
-      username: post.author.username,
-      avatar: new User(post.author, true).avatar
+    // Ensure post.author exists before accessing properties
+    if (post.author) {
+      post.author = {
+        username: post.author.username || 'Unknown', // Default to 'Unknown' if username is undefined
+        avatar: new User(post.author, true).avatar
+      }
+    } else {
+      post.author = {
+        username: 'Unknown',
+        avatar: '' // Provide a default avatar or handle as needed
+      }
     }
 
     return post
@@ -117,6 +125,7 @@ Post.reusablePostQuery = async function(uniqueOperations, visitorId, finalOperat
 
   return posts
 }
+
 
 Post.findSingleById = async function(id, visitorId) {
   if (typeof(id) !== "string" || !ObjectID.isValid(id)) {
