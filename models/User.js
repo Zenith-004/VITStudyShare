@@ -131,12 +131,5 @@ User.doesEmailExist = function(email) {
   })
 }
 
-User.isAdmin= function(username){
-if(username=="admin"){
-  return true
-}
-}
-
-
 
 module.exports = User
