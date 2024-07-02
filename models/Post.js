@@ -20,6 +20,7 @@ This way if you ever move to a new database you can just uncomment the line and 
 */
 
 let Post = function(data, userid, requestedPostId) {
+  console.log(data)
   this.data = data
   this.errors = []
   this.userid = userid
@@ -34,6 +35,7 @@ Post.prototype.cleanUp = function() {
   this.data = {
     title: sanitizeHTML(this.data.title.trim(), { allowedTags: [], allowedAttributes: {} }),
     body: sanitizeHTML(this.data.body.trim(), { allowedTags: [], allowedAttributes: {} }),
+    link: this.data.link,
     createdDate: new Date(),
     author: new ObjectID(this.userid)
   }
@@ -80,7 +82,7 @@ Post.prototype.actuallyUpdate = async function() {
   if (!this.errors.length) {
     await postsCollection.findOneAndUpdate(
       { _id: new ObjectID(this.requestedPostId) },
-      { $set: { title: this.data.title, body: this.data.body } }
+      { $set: { title: this.data.title, body: this.data.body, link:this.data.link } }
     )
     return "success"
   } else {
@@ -93,6 +95,7 @@ Post.reusablePostQuery = async function(uniqueOperations, visitorId, finalOperat
     { $lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" } },
     { $project: {
       title: 1,
+      link:1,
       body: 1,
       createdDate: 1,
       authorId: "$author",
