@@ -33,7 +33,9 @@
   <% } %>
     </div>
   -->
-  <div class="body-content text-white">
+  <%if(user){%>
+  
+    <div class="body-content text-white">
   
     <h1>Download Your Notes</h1>
     <ul>
@@ -51,8 +53,11 @@
             </li>
         <% }) %>
     </ul>
-</body>
 
+<%}else{%>
+<div class="text-white">
+  <h1>Please Sign In to View The Notes!</h1>
 </div>
-
+<%}%>
+</div>
 <%- include('includes/footer') %>
