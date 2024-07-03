@@ -1,5 +1,9 @@
 const express = require('express')
 const session = require('express-session')
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const MongoStore = require('connect-mongo')
 const flash = require('connect-flash')
 const markdown = require('marked')
@@ -83,5 +87,13 @@ io.on('connection', function(socket) {
     })
   }
 })
+
+app.use(express.static(path.join(__dirname, 'public')));
+// Simple logging middleware to debug requests
+app.use((req, res, next) => {
+    console.log(`Request for ${req.url}`);
+    next();
+});
+
 
 module.exports = server

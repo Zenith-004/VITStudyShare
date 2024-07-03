@@ -1,5 +1,14 @@
 const Post = require('../models/Post')
 
+const axios = require('axios');
+const cheerio = require('cheerio');
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
+const { streamPipeline } = require('stream/promises');
+const dotenv = require('dotenv')
+dotenv.config()
+
 exports.viewCreateScreen = (req, res) => {
   res.render('create-post')
 }
@@ -26,14 +35,107 @@ exports.apiCreate = async (req, res) => {
   }
 }
 
-exports.viewSingle = async (req, res) => {
+
+// fetching files ///////////////////////////////////////////////////////
+async function fetchFiles(url) {
   try {
-    let post = await Post.findSingleById(req.params.id, req.visitorId)
-    res.render('single-post-screen', { post: post, title: post.title, link: post.link })
-  } catch {
-    res.render('404')
+      const response = await axios.get(url);
+      const $ = cheerio.load(response.data);
+      const items = [];
+
+      $('a').each((index, element) => {
+          const href = $(element).attr('href');
+          if (href && href !== '../') {
+              const isDirectory = href.endsWith('/');
+              items.push({
+                  name: $(element).text(),
+                  url: url + href,
+                  type: isDirectory ? 'directory' : 'file'
+              });
+          }
+      });
+      return items;
+  } catch (error) {
+      console.error('Error fetching files:', error);
+      return [];
   }
 }
+
+async function downloadFiles(baseUrl, dirPath) {
+  const items = await fetchFiles(baseUrl);
+
+  for (const item of items) {
+      if (item.type === 'directory') {
+          const newDirPath = path.join(dirPath, item.name);
+          fs.mkdirSync(newDirPath, { recursive: true });
+          await downloadFiles(item.url, newDirPath);
+      } else {
+          const filePath = path.join(dirPath, item.name);
+          const writer = fs.createWriteStream(filePath);
+          const response = await axios({
+              url: item.url,
+              method: 'GET',
+              responseType: 'stream'
+          });
+          await streamPipeline(response.data, writer);
+      }
+  }
+}
+
+exports.viewSingle = async (req, res) => {
+  try {
+      let post = await Post.findSingleById(req.params.id, req.visitorId);
+      let apacheCompleteLink= process.env.APACHEURL+post.link
+      console.log(typeof(apacheCompleteLink))
+      
+      const files = await fetchFiles(apacheCompleteLink);
+
+      res.render('single-post-screen', { post, title: post.title, link: post.link, files, baseUrl: apacheCompleteLink });
+  } catch (error) {
+      console.error('Error in viewSingle:', error);
+      res.status(500).render('404');
+  }
+};
+
+exports.downloadFolder = async (req, res) => {
+  const folderUrl = req.query.url;
+  const folderName = path.basename(folderUrl);
+  const tempDir = path.join(__dirname, 'temp', folderName);
+
+  try {
+      fs.mkdirSync(tempDir, { recursive: true });
+      await downloadFiles(folderUrl, tempDir);
+
+      const zipPath = path.join(__dirname, 'temp', `${folderName}.zip`);
+      const output = fs.createWriteStream(zipPath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
+
+      archive.on('error', (err) => {
+          throw err;
+      });
+
+      output.on('close', () => {
+          res.download(zipPath, `${folderName}.zip`, (err) => {
+              if (err) {
+                  console.error('Error downloading file:', err);
+              }
+
+              fs.rmSync(tempDir, { recursive: true, force: true });
+              fs.unlinkSync(zipPath);
+          });
+      });
+
+      archive.pipe(output);
+      archive.directory(tempDir, false);
+      await archive.finalize();
+  } catch (error) {
+      console.error('Error creating zip file:', error);
+      res.status(500).send('Failed to create ZIP file.');
+  }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 
 exports.viewEditScreen = async (req, res) => {
   try {
