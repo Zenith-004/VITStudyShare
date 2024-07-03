@@ -5,8 +5,12 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const { streamPipeline } = require('stream/promises');
+
 const dotenv = require('dotenv')
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
+
 dotenv.config()
 
 exports.viewCreateScreen = (req, res) => {
@@ -37,100 +41,104 @@ exports.apiCreate = async (req, res) => {
 
 
 // fetching files ///////////////////////////////////////////////////////
+// Function to fetch files from a given URL
 async function fetchFiles(url) {
   try {
-      const response = await axios.get(url);
-      const $ = cheerio.load(response.data);
-      const items = [];
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
+    const items = [];
 
-      $('a').each((index, element) => {
-          const href = $(element).attr('href');
-          if (href && href !== '../') {
-              const isDirectory = href.endsWith('/');
-              items.push({
-                  name: $(element).text(),
-                  url: url + href,
-                  type: isDirectory ? 'directory' : 'file'
-              });
-          }
-      });
-      return items;
+    $('a').each((index, element) => {
+      const href = $(element).attr('href');
+      if (href && href !== '../') {
+        const isDirectory = href.endsWith('/');
+        items.push({
+          name: $(element).text(),
+          url: url + href,
+          type: isDirectory ? 'directory' : 'file'
+        });
+      }
+    });
+    return items;
   } catch (error) {
-      console.error('Error fetching files:', error);
-      return [];
+    console.error('Error fetching files:', error);
+    return [];
   }
 }
 
+// Function to download files and directories
 async function downloadFiles(baseUrl, dirPath) {
   const items = await fetchFiles(baseUrl);
 
   for (const item of items) {
-      if (item.type === 'directory') {
-          const newDirPath = path.join(dirPath, item.name);
-          fs.mkdirSync(newDirPath, { recursive: true });
-          await downloadFiles(item.url, newDirPath);
-      } else {
-          const filePath = path.join(dirPath, item.name);
-          const writer = fs.createWriteStream(filePath);
-          const response = await axios({
-              url: item.url,
-              method: 'GET',
-              responseType: 'stream'
-          });
-          await streamPipeline(response.data, writer);
-      }
+    if (item.type === 'directory') {
+      const newDirPath = path.join(dirPath, item.name);
+      fs.mkdirSync(newDirPath, { recursive: true });
+      await downloadFiles(item.url, newDirPath);
+    } else {
+      const filePath = path.join(dirPath, item.name);
+      const writer = fs.createWriteStream(filePath);
+      const response = await axios({
+        url: item.url,
+        method: 'GET',
+        responseType: 'stream'
+      });
+      await streamPipeline(response.data, writer);
+    }
   }
 }
 
+// Controller for viewing a single post
 exports.viewSingle = async (req, res) => {
   try {
-      let post = await Post.findSingleById(req.params.id, req.visitorId);
-      let apacheCompleteLink= process.env.APACHEURL+post.link
-      console.log(typeof(apacheCompleteLink))
-      
-      const files = await fetchFiles(apacheCompleteLink);
+    let post = await Post.findSingleById(req.params.id, req.visitorId);
+    let apacheCompleteLink = process.env.APACHEURL + post.link;
+    console.log(typeof(apacheCompleteLink));
+    
+    const files = await fetchFiles(apacheCompleteLink);
 
-      res.render('single-post-screen', { post, title: post.title, link: post.link, files, baseUrl: apacheCompleteLink });
+    res.render('single-post-screen', { post, title: post.title, link: post.link, files, baseUrl: apacheCompleteLink });
   } catch (error) {
-      console.error('Error in viewSingle:', error);
-      res.status(500).render('404');
+    console.error('Error in viewSingle:', error);
+    res.status(500).render('404');
   }
 };
 
+// Controller for downloading a folder
 exports.downloadFolder = async (req, res) => {
   const folderUrl = req.query.url;
   const folderName = path.basename(folderUrl);
   const tempDir = path.join(__dirname, 'temp', folderName);
 
   try {
-      fs.mkdirSync(tempDir, { recursive: true });
-      await downloadFiles(folderUrl, tempDir);
+    fs.mkdirSync(tempDir, { recursive: true });
+    await downloadFiles(folderUrl, tempDir);
 
-      const zipPath = path.join(__dirname, 'temp', `${folderName}.zip`);
-      const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+    const zipPath = path.join(__dirname, 'temp', `${folderName}.zip`);
+    const output = fs.createWriteStream(zipPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
 
-      archive.on('error', (err) => {
-          throw err;
+    archive.on('error', (err) => {
+      throw err;
+    });
+
+    output.on('close', () => {
+      res.download(zipPath, `${folderName}.zip`, (err) => {
+        if (err) {
+          console.error('Error downloading file:', err);
+        }
+
+        fs.rmSync(tempDir, { recursive: true, force: true });
+        fs.unlinkSync(zipPath);
       });
+    });
 
-      output.on('close', () => {
-          res.download(zipPath, `${folderName}.zip`, (err) => {
-              if (err) {
-                  console.error('Error downloading file:', err);
-              }
-
-              fs.rmSync(tempDir, { recursive: true, force: true });
-              fs.unlinkSync(zipPath);
-          });
-      });
-
-      archive.pipe(output);
-      archive.directory(tempDir, false);
-      await archive.finalize();
+    archive.pipe(output);
+    archive.directory(tempDir, false);
+    await archive.finalize();
   } catch (error) {
-      console.error('Error creating zip file:', error);
-      res.status(500).send('Failed to create ZIP file.');
+    console.error('Error creating zip file:', error);
+    res.status(500).send('Failed to create ZIP file.');
   }
 };
 
