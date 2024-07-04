@@ -19,7 +19,7 @@
     
   <p class="small mb-4 text-white">
     <a href="/profile/<%= post.author.username %>"><img class="avatar-tiny" src="<%= post.author.avatar %>"></a>
-    Posted by <a href="/profile/<%= post.author.username %>"><%= post.author.username %></a> on <%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getDate() %>/<%= post.createdDate.getFullYear() %>
+    Posted by <a href="/profile/<%= post.author.username %>"><%= post.author.username %></a> on <%= post.createdDate.getDate() %>/<%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getFullYear() %>
   </p>
 
   <div class="body-content text-white">
