@@ -37,12 +37,12 @@
   
     <div class="body-content text-white">
   
-    <h1>Download Your Notes</h1>
     <ul>
         <% files.forEach(file => { %>
             <li>
                 <% if (file.type === 'directory') { %>
                     <%if(file.name === ' Parent Directory'){%>
+                        <h1>Download Your Notes</h1>
                         <p>Folders will download as zip files. </p>
                     <%}else{%>
                     <a href="/download?url=<%= file.url %>"><%= file.name %> (Download)</a>

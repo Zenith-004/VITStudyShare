@@ -17,10 +17,14 @@
         <textarea required name="body" id="post-body" class="body-content tall-textarea form-control" type="text"><%= post.body %></textarea>
       </div>
 
-      <div class="form-group">
-        <label for="post-link" class="text-muted mb-1"><small>Body Content</small></label>
-        <textarea required name="link" id="post-link" class="form-control" type="text"><%= post.link %></textarea>
-      </div>
+      <% if (user && user.username === "vitstudyshare") { %>
+        <div class="form-group">
+          <label for="post-link" class="text-muted mb-1"><small>Link</small></label>
+          <textarea required name="link" id="post-link" class="form-control" rows="3"></textarea>
+        </div>
+      <% } else { %>
+        <div></div>
+      <% } %>
       
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       
