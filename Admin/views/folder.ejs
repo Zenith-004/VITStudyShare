@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= folderName %> - Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #444;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .file-info {
+            display: flex;
+            flex-direction: column;
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .upload-btn:hover {
+            background-color: #218838;
+        }
+        .upload-label {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .upload-label:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #777;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .folder-info {
+            margin-top: 20px;
+            color: #007bff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Folder: <%= folderName %></h1>
+
+    <h2>Files</h2>
+    <ul>
+        <% files.forEach(file => { %>
+            <li>
+                <div class="file-info">
+                    <span><%= folderName %>/<%= file %></span>
+                    <a href="/<%= folderName %>/<%= file %>" download><%= file %></a>
+                </div>
+                <button onclick="deleteFile('<%= folderName %>', '<%= file %>')">Delete</button>
+            </li>
+        <% }) %>
+    </ul>
+
+    <h2>Upload New File</h2>
+    <form action="/upload/<%= folderName %>" method="post" enctype="multipart/form-data">
+        <label for="file-upload" class="upload-label">Choose File</label>
+        <input id="file-upload" type="file" name="file" required onchange="displayFilePath()">
+        <button type="submit" class="upload-btn">Upload</button>
+        <div class="folder-info">
+            <span id="file-path"></span>
+        </div>
+    </form>
+
+    <a href="/" class="back-link">Back to folders</a>
+
+    <div class="footer">
+        
+    </div>
+
+    <script>
+        function deleteFile(folderName, fileName) {
+            if (confirm('Are you sure you want to delete ' + fileName + '?')) {
+                fetch(`/delete-file/${folderName}/${fileName}`, {
+                    method: 'POST', // Using POST with a special header for DELETE simulation
+                    headers: {
+                        'X-HTTP-Method-Override': 'DELETE'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete the file.');
+                    }
+                }).catch(err => {
+                    console.error('Error deleting file:', err);
+                });
+            }
+        }
+
+        function displayFilePath() {
+            const fileInput = document.getElementById('file-upload');
+            const filePath = fileInput.value.replace(/^.*[\\\/]/, '');
+            document.getElementById('file-path').innerText = ` - ${filePath}`;
+        }
+    </script>
+</body>
+</html>
