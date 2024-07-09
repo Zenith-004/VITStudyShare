@@ -42,9 +42,10 @@ exports.apiCreate = async (req, res) => {
 
 // fetching files ///////////////////////////////////////////////////////
 // Function to fetch files from a given URL
-async function fetchFiles(url) {
+async function fetchFiles(url,postLink) {
   try {
-    console.log(url);
+    console.log("fetchfiles: ",url)
+    console.log();
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
     const items = [];
@@ -55,7 +56,7 @@ async function fetchFiles(url) {
         const isDirectory = href.endsWith('/');
         items.push({
           name: $(element).text(),
-          url: url + href,
+          url: process.env.APACHEURL+ postLink + href,
           type: isDirectory ? 'directory' : 'file'
         });
       }
@@ -69,6 +70,8 @@ async function fetchFiles(url) {
 
 // Function to download files and directories
 async function downloadFiles(baseUrl, dirPath) {
+  console.log("downloadFiles :")
+  console.log(baseUrl)
   const items = await fetchFiles(baseUrl);
 
   for (const item of items) {
@@ -93,10 +96,12 @@ async function downloadFiles(baseUrl, dirPath) {
 exports.viewSingle = async (req, res) => {
   try {
     let post = await Post.findSingleById(req.params.id, req.visitorId);
+    let apacheCompleteLinkFetch = process.env.APACHEURL_FETCH + post.link;
     let apacheCompleteLink = process.env.APACHEURL + post.link;
-    console.log(typeof(apacheCompleteLink));
+    console.log("apacheCompleteLinkFetch: ",apacheCompleteLinkFetch);
+    console.log("apacheCompleteLink: ",apacheCompleteLink);
     
-    const files = await fetchFiles(apacheCompleteLink);
+    const files = await fetchFiles(apacheCompleteLinkFetch,post.link);
 
     res.render('single-post-screen', { post, title: post.title, link: post.link, files, baseUrl: apacheCompleteLink });
   } catch (error) {
