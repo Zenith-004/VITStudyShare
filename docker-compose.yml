@@ -4,7 +4,36 @@ services:
     build: ./Admin
     ports: 
       - 4000:4000
+    volumes:
+      - uploads:/usr/local/apache2/htdocs/uploads
+    networks:
+      - vitstudyshare-network
+
   client:
     build: ./Client
     ports:
       - 3000:3000
+    networks:
+      - vitstudyshare-network
+    environment:
+      - CONNECTIONSTRING=mongodb+srv://sheldonashish2004:9OH4UugOLerVLFSk@cluster0.c957qu6.mongodb.net/VITStudyShare?retryWrites=true&w=majority&appName=Cluster0
+      - PORT=3000
+      - JWTSECRET=m1ysup2ersect3retp4hra5se
+      - APACHEURL=http://apache:80/uploads/
+
+  apache:
+    build: ./Apache
+    ports: 
+      - 8080:80
+    container_name: vitstudyshare-apache
+    volumes:
+      - uploads:/usr/local/apache2/htdocs/uploads
+    networks:
+      - vitstudyshare-network
+
+networks:
+  vitstudyshare-network:
+    driver: bridge
+
+volumes:
+  uploads:

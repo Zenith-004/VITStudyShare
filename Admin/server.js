@@ -6,13 +6,13 @@ const fs = require('fs');
 const app = express();
 const port = 4000;
 
-
-const uploadsPath = path.join('C:', 'Apache24', 'htdocs', 'uploads');
+// Path to the shared uploads directory
+const uploadsPath = path.join('/usr/local/apache2/htdocs', 'uploads');
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from the new uploads directory
+// Serve static files from the uploads directory
 app.use(express.static(uploadsPath));
 
 // Multer configuration

@@ -44,6 +44,7 @@ exports.apiCreate = async (req, res) => {
 // Function to fetch files from a given URL
 async function fetchFiles(url) {
   try {
+    console.log(url);
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
     const items = [];
