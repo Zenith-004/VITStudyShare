@@ -5,7 +5,7 @@ services:
     ports: 
       - 4000:4000
     volumes:
-      - uploads:/usr/local/apache2/htdocs/uploads
+      - ./Apache/uploads:/usr/local/apache2/htdocs/uploads
     networks:
       - vitstudyshare-network
 
@@ -24,7 +24,7 @@ services:
     ports: 
       - 8080:80
     volumes:
-      - uploads:/usr/local/apache2/htdocs/uploads
+      - ./Apache/uploads:/usr/local/apache2/htdocs/uploads
     networks:
       - vitstudyshare-network
 
