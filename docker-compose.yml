@@ -2,7 +2,7 @@ version: "3.8"
 services:
   admin:
     build: ./Admin
-    ports: 
+    ports:
       - 4000:4000
     volumes:
       - ./Apache/uploads:/usr/local/apache2/htdocs/uploads
@@ -21,7 +21,7 @@ services:
 
   apache:
     build: ./Apache
-    ports: 
+    ports:
       - 8080:80
     volumes:
       - ./Apache/uploads:/usr/local/apache2/htdocs/uploads

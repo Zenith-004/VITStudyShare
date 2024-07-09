@@ -1,136 +1,129 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
-*{
-    margin:0;
-    padding:0;
-    box-sizing: boder-box;
-    font-family:"Poppins",sans-serif;
+@import url("https://fonts.googleapis.com/css?family=Poppins&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: boder-box;
+  font-family: "Poppins", sans-serif;
 }
 
-
-.vitlogo{
-    width: 3.125rem;
-    height: 3.125rem;
-
+.vitlogo {
+  width: 3.125rem;
+  height: 3.125rem;
 }
 
-.wrapper{
-    position: relative;
-    width:400px;
-    height:415px;
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, .5);
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
-    box-shadow:0 0 30px rgba(0, 0, 0, .5);
-    display: flex;
-    justify-content:center;
-    align-items: center;
+.wrapper {
+  position: relative;
+  width: 400px;
+  height: 415px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.wrapper .form-box{
-    width: 100%;
-    padding: 40px;
+.wrapper .form-box {
+  width: 100%;
+  padding: 40px;
 }
 
-.form-box h2{
-    font-size: 2em;
-    color:#ffffff;
-    text-align: center;
-
+.form-box h2 {
+  font-size: 2em;
+  color: #ffffff;
+  text-align: center;
 }
 
-.input-box{
-    position: relative;
-    width:100%;
-    height: 50%;
-    border-bottom: 2px solid #ffffff;
-    margin:30px 0;
+.input-box {
+  position: relative;
+  width: 100%;
+  height: 50%;
+  border-bottom: 2px solid #ffffff;
+  margin: 30px 0;
 }
 
-.input-box label{
-    position:absolute;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    font-size: 1em;
-    color:#ffffff;
-    font-weight:500;
-    pointer-events: none;
-    transition: .5s;
-
+.input-box label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  font-size: 1em;
+  color: #ffffff;
+  font-weight: 500;
+  pointer-events: none;
+  transition: 0.5s;
 }
-.input-box input:focus~label,
-.input-box input:valid~label{
-    top:-15px;
-}
-
-
-.input-box input{
-    width: 100%; 
-    height: 100%;
-    background: transparent;
-    border: none;
-    outline: none; 
-    font-size: 1em;
-    color: #ffffff;
-    font-weight: 600;
-    padding: 0 35x 0 5px;
+.input-box input:focus ~ label,
+.input-box input:valid ~ label {
+  top: -15px;
 }
 
-.input-box .icon{
+.input-box input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1em;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0 35x 0 5px;
+}
+
+.input-box .icon {
   position: absolute;
   right: 8px;
   font-size: 1.2em;
-  color:#ffffff;
+  color: #ffffff;
 }
 
-.remember-forgot{
-    font-size: .9em;
-    color: #ffffff;
-    font-weight: 500;
-    margin:-15px 0 15px;
-    display: flex;
-    justify-content:space-between;
+.remember-forgot {
+  font-size: 0.9em;
+  color: #ffffff;
+  font-weight: 500;
+  margin: -15px 0 15px;
+  display: flex;
+  justify-content: space-between;
 }
-.remember-forgot label input{
-    accent-color:white;
-    margin-right: 3px;
-
+.remember-forgot label input {
+  accent-color: white;
+  margin-right: 3px;
 }
-.remember-forgot a{
-    color: #ffffff;
-    text-decoration: none;
-}
-
-#btn{
-    width: 100%;
-    height:45px;
-    background:#ffffff;
-    border: none;
-    outline: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    color: BLACK;
-    font-weight: 500;
+.remember-forgot a {
+  color: #ffffff;
+  text-decoration: none;
 }
 
-#btn:hover{
-    background-color: #bebcbc;
-    color:#ffffff;
-
+#btn {
+  width: 100%;
+  height: 45px;
+  background: #ffffff;
+  border: none;
+  outline: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+  color: BLACK;
+  font-weight: 500;
 }
 
-.login-register{
-    font-size: .9em;
-    color: white;
-    text-align: center;
-    font-weight: 500;
-    margin:25px 0 10px;
+#btn:hover {
+  background-color: #bebcbc;
+  color: #ffffff;
 }
 
-.login-register p a{
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 600;
+.login-register {
+  font-size: 0.9em;
+  color: white;
+  text-align: center;
+  font-weight: 500;
+  margin: 25px 0 10px;
+}
+
+.login-register p a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
 }
