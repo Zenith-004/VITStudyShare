@@ -1,13 +1,6 @@
 version: "3.8"
+
 services:
-  admin:
-    build: ./Admin
-    ports:
-      - 4000:4000
-    volumes:
-      - ./Apache/uploads:/usr/local/apache2/htdocs/uploads
-    networks:
-      - vitstudyshare-network
 
   client:
     build: ./Client
@@ -28,9 +21,34 @@ services:
     networks:
       - vitstudyshare-network
 
+  file-manager:
+    image: bananaacid/docker-node-filemanager-esm:latest
+    restart: unless-stopped
+    container_name: file-manager
+    hostname: file-manager
+    environment:
+      FM_FILTER: "zip|tar.gz|7z|7zip|tar|gz|tgz|tbz|tar.bz2|tar.bz|txt|md|doc|docx|otf|ppt|pptx|xls|xlsx|csv|indd|jpg|jpeg|heic|heif|png|ps|svg|ai|avi|mp4|mpg|wav|flac|mpeg|mov"
+      FM_MIMEFILTER: "video/*|audio/*|image/*"
+      FM_SECURE: "" # Set this to the path of htpasswd file if using BASIC-AUTH
+      FM_USER: "" # Add users here if FM_SECURE is set to true
+      FM_MAXSIZE: 300
+      FM_LOGGING: "*"
+      FM_NAME: "File Manager" # You can change this to your preferred title
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Apache/uploads:/data
+      - /path/to/logs:/logs
+      - /path/to/secure:/secure
+    networks:
+      - vitstudyshare-network
+
 networks:
   vitstudyshare-network:
     driver: bridge
 
 volumes:
   uploads:
+    # Define any options for the volume if needed
