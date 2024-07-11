@@ -38,56 +38,99 @@ exports.apiCreate = async (req, res) => {
     res.json(errors);
   }
 };
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// fetching files ///////////////////////////////////////////////////////
-// Function to fetch files from a given URL
-async function fetchFiles(url, postLink) {
+// Fetch files from a URL 
+//(this function only works for folders)
+//it will work with the download of other files because 
+//this function gets called again while downlading of the whole file.
+
+async function fetchFiles(url) {
   try {
-    console.log("fetchfiles: ", url);
-    console.log();
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
     const items = [];
 
-    $("a").each((index, element) => {
-      const href = $(element).attr("href");
-      if (href && href !== "../") {
-        const isDirectory = href.endsWith("/");
+    $('a').each((index, element) => {
+      const href = $(element).attr('href');
+      if (href && href !== '../') {
+        const isDirectory = href.endsWith('/');
+        //console.log("__________________________",url)
         items.push({
           name: $(element).text(),
-          url: process.env.APACHEURL + postLink + href,
-          type: isDirectory ? "directory" : "file",
+          url: url + href,
+          //url: isDirectory ? url + href : process.env.APACHEURL+ postlink + href ,
+          type: isDirectory ? 'directory' : 'file'
         });
       }
     });
+
     return items;
   } catch (error) {
-    console.error("Error fetching files:", error);
+    console.error('Error fetching files:', error);
     return [];
   }
 }
 
-// Function to download files and directories
-async function downloadFiles(baseUrl, dirPath) {
-  console.log("downloadFiles :");
-  console.log(baseUrl);
-  const items = await fetchFiles(baseUrl);
+// Fetch files from a URL (Single files download url fetch)
+async function fetchFiles2(url,postlink) {
+  try {
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
+    const items = [];
 
-  for (const item of items) {
-    if (item.type === "directory") {
-      const newDirPath = path.join(dirPath, item.name);
-      fs.mkdirSync(newDirPath, { recursive: true });
-      await downloadFiles(item.url, newDirPath);
-    } else {
-      const filePath = path.join(dirPath, item.name);
-      const writer = fs.createWriteStream(filePath);
-      const response = await axios({
-        url: item.url,
-        method: "GET",
-        responseType: "stream",
-      });
-      await streamPipeline(response.data, writer);
+    $('a').each((index, element) => {
+      const href = $(element).attr('href');
+      if (href && href !== '../') {
+        const isDirectory = href.endsWith('/');
+        //console.log("__________________________",url)
+        items.push({
+          name: $(element).text(),
+          url: process.env.APACHEURL+ postlink + href ,
+          type: isDirectory ? 'directory' : 'file'
+        });
+      }
+    });
+
+    return items;
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    return [];
+  }
+}
+
+// Download files and directories recursively
+async function downloadFiles(baseUrl, dirPath) {
+  try {
+    const items = await fetchFiles(baseUrl);
+
+    for (const item of items) {
+      if (item.type === 'directory') {
+        const newDirPath = path.join(dirPath, item.name);
+        fs.mkdirSync(newDirPath, { recursive: true });
+        await downloadFiles(item.url, newDirPath);
+      } else {
+        const filePath = path.join(dirPath, item.name);
+        const writer = fs.createWriteStream(filePath);
+        const response = await axios({
+          url: item.url,
+          method: 'GET',
+          responseType: 'stream'
+        });
+
+        await new Promise((resolve, reject) => {
+          pipeline(response.data, writer, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
     }
+  } catch (error) {
+    console.error('Error downloading files:', error);
   }
 }
 
@@ -97,12 +140,10 @@ exports.viewSingle = async (req, res) => {
     let post = await Post.findSingleById(req.params.id, req.visitorId);
     let apacheCompleteLinkFetch = process.env.APACHEURL_FETCH + post.link;
     let apacheCompleteLink = process.env.APACHEURL + post.link;
-    console.log("apacheCompleteLinkFetch: ", apacheCompleteLinkFetch);
-    console.log("apacheCompleteLink: ", apacheCompleteLink);
 
-    const files = await fetchFiles(apacheCompleteLinkFetch, post.link);
+    const files = await fetchFiles2(apacheCompleteLinkFetch,post.link);
 
-    res.render("single-post-screen", {
+    res.render('single-post-screen', {
       post,
       title: post.title,
       link: post.link,
@@ -110,48 +151,62 @@ exports.viewSingle = async (req, res) => {
       baseUrl: apacheCompleteLink,
     });
   } catch (error) {
-    console.error("Error in viewSingle:", error);
-    res.status(500).render("404");
+    console.error('Error in viewSingle:', error);
+    res.status(500).render('404');
   }
 };
 
-// Controller for downloading a folder
-exports.downloadFolder = async (req, res) => {
-  const folderUrl = req.query.url;
+// Controller for downloading a folder or file
+exports.downloadFolderOrFile = async (req, res) => {
+  const folderUrl = req.query.url.replace('http://localhost:8080', 'http://apache:80');
   const folderName = path.basename(folderUrl);
-  const tempDir = path.join(__dirname, "temp", folderName);
+  const tempDir = path.join(__dirname, 'temp', folderName);
 
   try {
+    const items = await fetchFiles(folderUrl);
+
+    // Create temporary directory
     fs.mkdirSync(tempDir, { recursive: true });
     await downloadFiles(folderUrl, tempDir);
 
-    const zipPath = path.join(__dirname, "temp", `${folderName}.zip`);
+    const zipPath = path.join(__dirname, 'temp', `${folderName}.zip`);
     const output = fs.createWriteStream(zipPath);
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    const archive = archiver('zip', { zlib: { level: 9 } });
 
-    archive.on("error", (err) => {
-      throw err;
-    });
-
-    output.on("close", () => {
+    output.on('close', () => {
       res.download(zipPath, `${folderName}.zip`, (err) => {
         if (err) {
-          console.error("Error downloading file:", err);
+          console.error('Error downloading file:', err);
+          res.status(500).send('Failed to download ZIP file.');
         }
 
-        fs.rmSync(tempDir, { recursive: true, force: true });
-        fs.unlinkSync(zipPath);
+        cleanup(tempDir, zipPath);
       });
+    });
+
+    archive.on('error', (err) => {
+      console.error('Error creating zip file:', err);
+      res.status(500).send('Failed to create ZIP file.');
     });
 
     archive.pipe(output);
     archive.directory(tempDir, false);
     await archive.finalize();
   } catch (error) {
-    console.error("Error creating zip file:", error);
-    res.status(500).send("Failed to create ZIP file.");
+    console.error('Error handling download:', error);
+    res.status(500).send('Failed to download folder.');
   }
 };
+
+// Helper function to clean up temporary files and directories
+function cleanup(tempDir, zipPath) {
+  try {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.unlinkSync(zipPath);
+  } catch (error) {
+    console.error('Error cleaning up:', error);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
