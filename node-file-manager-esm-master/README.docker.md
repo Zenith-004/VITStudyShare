@@ -1,56 +1,49 @@
-For more info see https://www.npmjs.com/package/node-file-manager-esm 
+# 🎉 File Manager 🎉
 
 ![screenshot v3](https://user-images.githubusercontent.com/1894723/74706364-003dd880-5217-11ea-8f26-b616f99eb39a.png)
 
-# File Manager
-File manager web server based on Node.js with Koa, Angular.js and Bootstrap, updated to use a recent Koa and be mount compatible and is rewritten to be an ECMAScript Module (or Babel). Has multi file upload. Reduced dependencies. Usable from cli.
+Welcome to **File Manager** - the ultimate web server for managing your files with style! 🚀 Built on Node.js with Koa, Angular.js, and Bootstrap, this project has been modernized to use the latest Koa, be mount compatible, and rewritten as an ECMAScript Module (or Babel). With multi-file upload capabilities and reduced dependencies, it's your go-to solution for file management. Usable from CLI, standalone, or Docker - the choice is yours! 🎈
 
-Supported: ESM-importable, standalone, docker
+## 🌟 Features
 
-## Environment variables
-These are relevant for the container
+- **ESM-importable**: Use it as an ECMAScript Module.
+- **Standalone & Docker Support**: Run it standalone or in a Docker container.
+- **Multi-file Upload**: Easily upload multiple files at once.
+- **Reduced Dependencies**: Sleeker and faster than ever before.
+- **CLI Usability**: Run it directly from your terminal.
+- **Access over the Internet**: Share files with the world (with security in mind).
 
-- `FM_PORT` -- [5000] The server port to use, if no port param was given, tries `FM_PORT` then `PORT`  
-- `FM_SECURE` -- Is off by default! Use BASIC-AUTH with the htpasswd of the path provided. To use `FM_USER` or `--user`, set `FM_SECURE=true`
-- `FM_USER` -- If `FM_SECURE` is used (or `FM_SECURE=true`), users can be added manually. `pw` can be a clear password or a password hash created by `htpasswd`. It will ignore any htpasswd file from `FM_SECURE`. Example `FM_USER="adam:adam123\neve:eve123"`
-- `FM_MAXSIZE` -- [300] Set the max file size for uploads in MB
-- `FM_LOGGING` -- Output logging info [using just `*` resolves to `fm:*` and can be set as environment variable with `DEBUG=fm:*` as well. `FM_LOGGING=traffic` will only show `fm:traffic`]  To see all possible output, set `DEBUG=*`
-- `FM_FILTER` -- ["zip|tar.gz|7z|..."] Important files to filter for. The pattern is seperated by `|`. Example: zip|mp4|txt
-- `FM_MIMEFILTER` -- ["video/*|audio/*|image/*"] Only for file selection upload dialog in the web interface. Example: `video/*|image/*`
-- `FM_NAME` -- ["File Manager"] Overwrite the web ui title
+## 🔧 Environment Variables
+These are relevant for the container:
 
-## Generating htaccess, proxy, ...
-For more details see:
+- `FM_PORT`: [5000] The server port to use.
+- `FM_SECURE`: Use BASIC-AUTH with the htpasswd file path provided. To use `FM_USER` or `--user`, set `FM_SECURE=true`.
+- `FM_USER`: If `FM_SECURE` is used, users can be added manually. `pw` can be a clear password or a password hash created by `htpasswd`. Example: `FM_USER="adam:adam123\neve:eve123"`.
+- `FM_MAXSIZE`: [300] Set the max file size for uploads in MB.
+- `FM_LOGGING`: Output logging info. Use `*` for full logging.
+- `FM_FILTER`: ["zip|tar.gz|7z|..."] Important files to filter for. The pattern is separated by `|`.
+- `FM_MIMEFILTER`: ["video/*|audio/*|image/*"] File selection filter for the upload dialog.
+- `FM_NAME`: ["File Manager"] Overwrite the web UI title.
 
-https://www.npmjs.com/package/node-file-manager-esm 
+## 📂 Volumes
+Exposed are:
 
-## Volumes
-Exposed are
+- `/data`: Folder to use.
+- `/logs`: Folder to save any logs to.
+- `/secure`: Folder where the `htpasswd` file is (to be used as `FM_SECURE=/secure/htpasswd`).
 
-- `/data` for the folder to use
-- `/logs` for the folder to save any logs to
-- `/secure` for the folder where the `htpasswd` file is (to be used as `FM_SECURE=/secure/htpasswd`)
+## 🚀 Usage
 
-## Use
+### Docker Command
 
+Run the File Manager with Docker:
 ```bash
-\> docker run -p 5000:5000 -it --volume D:\:/data --name node-filemanager-esm bananaacid/docker-node-filemanager-esm
+docker run -p 5000:5000 -it --volume D:\:/data --name node-filemanager-esm bananaacid/docker-node-filemanager-esm
 ```
 
-## Changes
-- added support for big files (v3.2.0)
-- upload progress and file updates for all connected clients (v3.2.0)
-- max upload filesize (v3.2.0)
-- handling of canceled files (v3.2.0)
-- full standalone support (v3.2.0)
-  - relative paths support for `--directory` and `--secure` (v3.2.0) 
-- file renaming if error named file exists and alike (v3.3.1)
-- adding users by commandline/env (v3.3.1)
-- fixed env presented to docker to be FM_USER (v3.3.2)
-- added compose file (v3.3.2)
-- reducing docker image from 1GB to 211MB (v3.3.3)
+### Docker Compose
 
-## docker-compose.yaml
+Use the following `docker-compose.yaml` to set up your environment:
 ```yaml
 version: '3.3'
 
@@ -78,3 +71,21 @@ services:
 networks:
   filemanager:
 ```
+
+## 🔄 Changes
+
+- **Big File Support**: Now you can upload those large files without a hitch! (v3.2.0)
+- **Upload Progress**: Stay informed with upload progress updates for all connected clients. (v3.2.0)
+- **Max Upload Filesize**: Set limits on file size to keep things under control. (v3.2.0)
+- **Cancel File Handling**: Manage canceled file uploads with ease. (v3.2.0)
+- **Standalone Support**: Full standalone support with relative path handling. (v3.2.0)
+- **File Renaming**: Automatic file renaming to avoid conflicts. (v3.3.1)
+- **User Management**: Add users via command line or environment variables. (v3.3.1)
+- **Docker Enhancements**: Fixed environment variables and reduced image size from 1GB to 211MB! (v3.3.3)
+
+## 🔐 Generating htaccess, Proxy, etc.
+For more details, visit the [npm package page](https://www.npmjs.com/package/node-file-manager-esm).
+
+---
+
+Now you're all set to manage your files like a pro! Happy file managing! 🎉🗂️
