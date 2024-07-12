@@ -1,7 +1,3 @@
-Here's your README with proper formatting for new lines to ensure it displays correctly on GitHub:
-
----
-
 # 🎓 VITStudyShare
 
 ## 📚 About VITStudyShare
